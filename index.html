@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<title>Auckland Place Finder App</title>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link href="https://fonts.googleapis.com/css?family=Work+Sans:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+		<!--plugin nice-select-->
+		<link rel="stylesheet" href="js/jquery-nice-select/css/nice-select.css">
+		<!--  -->
+		<link rel="stylesheet" href="css/style.css">
+	</head>
+	<body>
+		<div class="d-flex wrapper">
+			<div class="search-container col-md-4">
+				<div class="d-flex no-gutters search-header">
+					<!-- nice-select-plugin-->
+					<select name="city-input" id="city-input" class="wide">
+						<option data-display="Select Location" id="select-city-input" value="-36.8446152873055,174.76662397384643">Select</option>
+						<option value="-36.8446152873055,174.76662397384644" id="Auckland" data-width="auto">Auckland</option>
+						<option value="-36.78368259866044,175.01156330108643" id="Waiheke" data-width="auto">Waiheke Island</option>
+						<option value="-36.829468244763696,174.79784488677979" id="Devonport" data-width="auto">Devonport</option>
+						<option value="-36.78839127856238,174.7717523574829" id="Takapuna" data-width="auto">Takapuna</option>
+						<option value="-36.84913134182603,174.8317050933838" id="Mission Bay" data-width="auto">Mission Bay</option>
+					</select>
+				</div>
+			</div>
+			<div class="map-container d-flex container-fluid flex-nowrap no-gutters col-md-8">
+				<!-- buttons to select categories -->
+				<div class="span-btn">
+					<div class="span-auto">
+						<span class="btn btn-primary btn-cafe" data-type="cafe"></span>
+						<span class="btn btn-primary btn-dessert" data-type="dessert"></span>
+						<span class="btn btn-primary btn-restaurant" data-type="restaurant"></span>
+						<span class="btn btn-primary btn-bar" data-type="bar"></span>
+						<span class="btn btn-primary btn-scenic" data-type="scenic"></span>
+					</div>
+				</div>
+				
+				<div class="no-gutters" id="map">
+				</div>
+				<div class="logotype">Auckland<br>Place<br>Finder</div>
+				<!-- <img class="logo" src="img/canwehelp.png" alt="logo"> -->
+				<div class="" id="search-details">
+				</div>
+			</div>
+		</div>
+		
+		<!-- Modal popup -->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+					</div>
+				</div>
+				<!-- search-details-template pop-up -->
+				<script type="text/template" id="details-template">
+				<div class="d-flex search-details-header">
+								<h2 class="h2-details-template"></h2>
+								<div class="search-close" id="fa-details"></div>
+				</div>
+				<p class="p-details-template">{{name}}</p>
+				
+				<div class="foursquare-img">
+								{{#each photos.groups[0].items}}
+								<img src={{this.prefix}}100x100{{this.suffix}}>
+								{{/each}}
+				</div>
+				<ul class="ul-details-template">
+								{{#if location.address}}
+								<li class="li content address">{{location.address}}<br>Auckland, New Zealand
+											{{else}}<li class="li content address">No Address Available</li></li>
+											{{/if}}
+												
+											<li class="li content rating">Rating<br>{{rating}}</li>
+											{{#if price}}
+											<li class="li content price">Price<br>{{price.message}}
+													{{else}}<li class="li content price">No Price Available</li></li>
+													{{/if}}
+														
+													{{#if twitter}}
+													<li class="li content phone">Phone<br>{{contact.phone}}
+															{{else}}<li class="li content phone">No Phone Available</li></li>
+															{{/if}}
+																	
+															{{#if twitter}}
+															<li class="li content twitter">Twitter<br>{{contact.twitter}}
+																	{{else}}<li class="li content twitter">No Twitter Available</li></li>
+																	{{/if}}
+																							
+																	{{#if likes.count}}
+																	<div class="content-likes">
+																			<div class="likes"></div>
+																			<li class="likes-count"><br>{{likes.count}}
+																					{{else}}<li class="likes-count">No Likes Available</li></li>
+																		</div>
+																		{{/if}}
+																			<div class="phrases">
+																						<div class="phrases-svg"></div>
+																			</div>
+																			{{#if phrases}}
+																			{{#each phrases}}
+																			<li class="li content phrases-text"><br>{{this.phrase}}<br>{{this.sample.text}}{{else}}
+																			</li>
+																			{{/each}}
+																			{{/if}}
+																				<br>
+																			<br>
+																			<li class="li content route-map"><a href="https://www.google.com/maps/dir/?api=1&destination={{location.address}},Auckland">Route to destination</a></li>
+																							
+																			<div class="popular">
+																							{{#if popular}}
+																							{{#each this.popular.timeframes}}
+																							<li class="li content timeframes">{{this.days}} - {{this.open[0].renderedTime}}
+																							{{else}}</li>
+																							{{/each}}
+																							{{/if}}
+																			</div>
+																			<br>
+																							
+																			{{#if url}}
+																			<li class="li content website">Website<br><a class="url" href="{{url}}">{{url}}</a>
+																			{{else}}<li class="li content url">
+																					<a class="li content url" href="{{shortUrl}}">{{shortUrl}}</a></li></li>
+																					{{/if}}
+																			</ul>
+										</script>
+										
+										
+										<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin=""></script>
+										<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+										<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+										<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+										<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+										<script src="js/template7/template7.js"></script>
+										<script src="js/jquery-nice-select/js/jquery.nice-select.js"></script>
+										<script src="js/script.js"></script>
+									</body>
+								</html>
